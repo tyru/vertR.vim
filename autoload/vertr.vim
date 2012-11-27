@@ -10,6 +10,7 @@ set cpo&vim
 " TODO:
 " - Support 'gj' for moving command while replacing.
 " - Support optional argument to set a value of 'virtualedit'.
+" - Test input including <Tab> character.
 
 function! vertr#R(virtual_replace, exclusive, ...)
     " Highlight a current cursor position.
