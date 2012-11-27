@@ -22,15 +22,10 @@ function! s:vertR(virtual)
 
     " Join undo-history when all histories after a first action
     let firstinput = 1
-    " A line number which is appended
-    " when a next line does not exist
-    let appended_lnum = 0
-    " Save detailed state than 'deleted_buf'. (UNUSED)
+    " Save a deleted position.
     " 1. A position exists or not
     " 2. A replaced character
     let delstack = []
-    " TODO: Deprecate and use delstack.
-    let deleted_buf = ''
     " 'r' command to be used.
     let r_cmd = (a:virtual ? 'g' : '').'r'
     " Debug or not
@@ -39,7 +34,7 @@ function! s:vertR(virtual)
     try
         while 1
             echohl ModeMsg
-            echon '--- vertical '.(a:virtual ? 'V' : '').'REPLACE ---'.(debug ? (' firstinput = '.firstinput.', appended_lnum = '.appended_lnum.', deleted_buf = '.string(deleted_buf)) : '')
+            echon '--- vertical '.(a:virtual ? 'V' : '').'REPLACE ---'.(debug ? (' firstinput = '.firstinput.', delstack = '.string(delstack)) : '')
             let c = s:getchar()
 
             if c ==# "\<Esc>"
@@ -49,12 +44,11 @@ function! s:vertR(virtual)
                     " Go backward.
                     normal! k
                     " Restore a replaced character.
-                    if deleted_buf !=# ''
-                        let [deleted_buf, lastchar] = matchlist(deleted_buf, '\(\%([^a]\|a\)*\)\(.\)')[1:2]
+                    if !empty(delstack)
+                        let last = remove(delstack, -1)
                         if !firstinput | undojoin | endif
-                        execute 'normal!' r_cmd.lastchar
-                        if appended_lnum isnot 0
-                        \&& appended_lnum <=# line('.')+1
+                        execute 'normal!' r_cmd.last['char']
+                        if last.appended
                             execute line('.')+1 'delete _'
                         endif
                         " Redraw a replace character, highlight.
@@ -62,11 +56,12 @@ function! s:vertR(virtual)
                     endif
                 endif
             else
-                " Push a character to deleted_buf.
+                let deleted_position = {'char': '', 'appended': 0}
+                " Push a character to 'delstack'.
                 let reg_x     = getreg('x', 1)
                 let regtype_x = getregtype('x')
                 normal! "xyl
-                let deleted_buf .= @x
+                let deleted_position.char = @x
                 call setreg('x', reg_x, regtype_x)
                 " Replace a current character.
                 if !firstinput | undojoin | endif
@@ -74,13 +69,13 @@ function! s:vertR(virtual)
                 " Go forward.
                 if line('.') is line('$')
                     call append(line('.'), '')
-                    if !appended_lnum
-                        let appended_lnum = line('.') + 1
-                    endif
+                    let deleted_position.appended = 1
                 endif
                 normal! j
                 " Redraw a replace character, highlight.
                 call s:redraw()
+
+                call add(delstack, deleted_position)
             endif
             let firstinput = 0
         endwhile
