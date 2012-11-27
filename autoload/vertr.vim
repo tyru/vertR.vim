@@ -11,15 +11,7 @@ set cpo&vim
 " - Support 'gj' for moving command while replacing.
 " - Support optional argument to set a value of 'virtualedit'.
 
-function! vertr#R()
-    return s:vertR(0)
-endfunction
-
-function! vertr#gR()
-    return s:vertR(1)
-endfunction
-
-function! s:vertR(virtual)
+function! vertr#R(virtual_replace, exclusive, ...)
     " Highlight a current cursor position.
     highlight link VertRCurrentCursor Cursor
 
@@ -30,14 +22,24 @@ function! s:vertR(virtual)
     " 2. A replaced character
     let delstack = []
     " 'r' command to be used.
-    let r_cmd = (a:virtual ? 'g' : '').'r'
+    let r_cmd = (a:virtual_replace ? 'g' : '').'r'
+    " 'j' command to be used.
+    let j_cmd = (a:exclusive       ? 'g' : '').'j'
+    " 'k' command to be used.
+    let k_cmd = (a:exclusive       ? 'g' : '').'k'
     " Debug or not
     let debug = 0
+
+    if a:0 && type(a:1) is type("")
+    \   && a:1 =~# '^\%(block\|insert\|all\|onemore\)\%(,\%(block\|insert\|all\|onemore\)\)\=$'
+        let prev_virtualedit = &l:virtualedit
+        let &l:virtualedit = a:1
+    endif
 
     try
         while 1
             echohl ModeMsg
-            echon '--- vertical '.(a:virtual ? 'V' : '').'REPLACE ---'.(debug ? (' firstinput = '.firstinput.', delstack = '.string(delstack)) : '')
+            echon '--- vertical '.(a:virtual_replace ? 'V' : '').'REPLACE ---'.(debug ? (' firstinput = '.firstinput.', delstack = '.string(delstack)) : '')
             let c = s:getchar()
 
             if c ==# "\<Esc>"
@@ -45,7 +47,7 @@ function! s:vertR(virtual)
             elseif c ==# "\<BS>" || c ==# "\<C-h>"
                 if line('.') isnot 1
                     " Go backward.
-                    normal! k
+                    execute 'normal!' k_cmd
                     " Restore a replaced character.
                     if !empty(delstack)
                         let last = remove(delstack, -1)
@@ -74,7 +76,7 @@ function! s:vertR(virtual)
                     call append(line('.'), '')
                     let deleted_position.appended = 1
                 endif
-                normal! j
+                execute 'normal!' j_cmd
                 " Redraw a replace character, highlight.
                 call s:redraw()
 
@@ -85,6 +87,9 @@ function! s:vertR(virtual)
     finally
         echohl None
         call s:clear_matches()
+        if exists('prev_virtualedit')
+            let &l:virtualedit = prev_virtualedit
+        endif
     endtry
 endfunction
 
