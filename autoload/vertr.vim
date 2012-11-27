@@ -16,6 +16,8 @@ function! vertr#R(virtual_replace, exclusive, ...)
     " Highlight a current cursor position.
     highlight link VertRCurrentCursor Cursor
 
+    " Debug or not
+    let debug = 0
     " Join undo-history when all histories after a first action
     let firstinput = 1
     " Save a deleted position.
@@ -28,8 +30,10 @@ function! vertr#R(virtual_replace, exclusive, ...)
     let j_cmd = (a:exclusive       ? 'g' : '').'j'
     " 'k' command to be used.
     let k_cmd = (a:exclusive       ? 'g' : '').'k'
-    " Debug or not
-    let debug = 0
+
+    if debug
+        PP! [a:virtual_replace, a:exclusive]
+    endif
 
     if a:0 && type(a:1) is type("")
     \   && a:1 =~# '^\%(block\|insert\|all\|onemore\)\%(,\%(block\|insert\|all\|onemore\)\)\=$'
@@ -40,7 +44,11 @@ function! vertr#R(virtual_replace, exclusive, ...)
     try
         while 1
             echohl ModeMsg
-            echon '--- vertical '.(a:virtual_replace ? 'V' : '').'REPLACE ---'.(debug ? (' firstinput = '.firstinput.', delstack = '.string(delstack)) : '')
+            let modemsg = '--- vertical '.(a:virtual_replace ? 'V' : '').'REPLACE ---'
+            if debug
+                let modemsg .= ' firstinput = '.firstinput.', delstack = '.string(delstack)
+            endif
+            echon modemsg
             let c = s:getchar()
 
             if c ==# "\<Esc>"
