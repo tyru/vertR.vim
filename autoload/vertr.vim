@@ -27,7 +27,7 @@ function! s:vertR(virtual)
     let deleted_buf = ''    " TODO: delstackで置き換える
     let r_cmd = (a:virtual ? 'g' : '').'r'
     " Debug or not
-    let debug = 1
+    let debug = 0
 
     try
         while 1
