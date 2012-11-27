@@ -17,14 +17,21 @@ function! vertr#gR()
 endfunction
 
 function! s:vertR(virtual)
+    " Highlight a current cursor position.
     highlight link VertRCurrentCursor Cursor
+
     " Join undo-history when all histories after a first action
     let firstinput = 1
     " A line number which is appended
     " when a next line does not exist
     let appended_lnum = 0
-    let delstack = []    " 詳細な状態 (colの存在の有無、置き換えられる以前の文字、etc.)
-    let deleted_buf = ''    " TODO: delstackで置き換える
+    " Save detailed state than 'deleted_buf'. (UNUSED)
+    " 1. A position exists or not
+    " 2. A replaced character
+    let delstack = []
+    " TODO: Deprecate and use delstack.
+    let deleted_buf = ''
+    " 'r' command to be used.
     let r_cmd = (a:virtual ? 'g' : '').'r'
     " Debug or not
     let debug = 0
