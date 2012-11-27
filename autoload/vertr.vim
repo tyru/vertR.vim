@@ -7,6 +7,9 @@ set cpo&vim
 " }}}
 
 
+" TODO:
+" - Support 'gj' for moving command while replacing.
+" - Support optional argument to set a value of 'virtualedit'.
 
 function! vertr#R()
     return s:vertR(0)
