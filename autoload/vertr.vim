@@ -26,7 +26,7 @@ function! vertr#R(...)
     let firstinput = 1
     " Save a deleted position.
     " 1. A position exists or not
-    " 2. A replaced character
+    " 2. A old character
     let delstack = []
     " 'r' command to be used.
     let r_cmd = (virtual_replace ? 'g' : '').'r'
@@ -46,6 +46,7 @@ function! vertr#R(...)
     endif
 
     try
+        call s:redraw()
         while 1
             echohl ModeMsg
             let modemsg = '--- vertical '.(virtual_replace ? 'V' : '').'REPLACE ---'
@@ -61,28 +62,30 @@ function! vertr#R(...)
                 if line('.') isnot 1
                     " Go backward.
                     execute 'normal!' k_cmd
-                    " Restore a replaced character.
+                    " Restore a old character.
                     if !empty(delstack)
                         let last = remove(delstack, -1)
                         if !firstinput | undojoin | endif
-                        execute 'normal!' r_cmd.last['char']
+                        call setline('.', last['line'])
                         if last.appended
                             execute line('.')+1 'delete _'
                         endif
-                        " Redraw a replace character, highlight.
-                        call s:redraw()
                     endif
+                    " Redraw a replace character, highlight.
+                    call s:redraw()
                 endif
             else
-                let deleted_position = {'char': '', 'appended': 0}
-                " Push a character to 'delstack'.
-                let reg_x     = getreg('x', 1)
-                let regtype_x = getregtype('x')
-                normal! "xyl
-                let deleted_position.char = @x
-                call setreg('x', reg_x, regtype_x)
+                let deleted_position = {
+                \   'line': '',
+                \   'appended': 0,
+                \}
+                " Save a previous line. (not only an old character)
+                " Because whitespaces may be appended
+                " before an new character when a previous line is empty.
+                let deleted_position.line = getline('.')
                 " Replace a current character.
                 if !firstinput | undojoin | endif
+                let firstinput = 0
                 execute 'normal!' r_cmd.c
                 " Go forward.
                 if line('.') is line('$')
@@ -95,11 +98,14 @@ function! vertr#R(...)
 
                 call add(delstack, deleted_position)
             endif
-            let firstinput = 0
         endwhile
     finally
         echohl None
+        " Erase ModeMsg.
         call s:clear_matches()
+        redraw
+        echo ''
+        " Restore 'virtualedit'.
         if exists('prev_virtualedit')
             let &l:virtualedit = prev_virtualedit
         endif
@@ -116,7 +122,7 @@ function! s:redraw()
     call s:clear_matches()
     call matchadd('VertRCurrentCursor', '\%'.col('.').'c'.'\%'.line('.').'l')
 
-    " Redraw a replaced character, current cursor highlight.
+    " Redraw a new character, current cursor highlight.
     redraw
 endfunction
 

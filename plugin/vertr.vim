@@ -13,8 +13,10 @@ set cpo&vim
 " }}}
 
 
-nnoremap <Plug>vertR->R    :<C-u>call vertr#R({'virtual_replace': 0})<CR>
-nnoremap <Plug>vertR->gR   :<C-u>call vertr#R({'virtual_replace': 1})<CR>
+nnoremap <Plug>vertR->R    :<C-u>call vertr#R({'virtual_replace': 0, 'exclusive': 0})<CR>
+nnoremap <Plug>vertR->gR   :<C-u>call vertr#R({'virtual_replace': 1, 'exclusive': 0})<CR>
+nnoremap <Plug>vertR->R(exclusive)    :<C-u>call vertr#R({'virtual_replace': 0, 'exclusive': 1})<CR>
+nnoremap <Plug>vertR->gR(exclusive)   :<C-u>call vertr#R({'virtual_replace': 1, 'exclusive': 1})<CR>
 
 if !exists('g:vertr_no_default_keymappings')
 \   || !g:vertr_no_default_keymappings
