@@ -36,7 +36,7 @@ function! vertr#R(virtual_replace, exclusive, ...)
     endif
 
     if a:0 && type(a:1) is type("")
-    \   && a:1 =~# '^\%(block\|insert\|all\|onemore\)\%(,\%(block\|insert\|all\|onemore\)\)\=$'
+    \   && a:1 =~# '^\%(block\|insert\|all\|onemore\)\%(,\%(block\|insert\|all\|onemore\)\)*$'
         let prev_virtualedit = &l:virtualedit
         let &l:virtualedit = a:1
     endif
