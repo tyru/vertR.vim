@@ -10,9 +10,15 @@ set cpo&vim
 " TODO:
 " - Test input including <Tab> character.
 
-function! vertr#R(virtual_replace, exclusive, ...)
+function! vertr#R(...)
     " Highlight a current cursor position.
     highlight link VertRCurrentCursor Cursor
+
+    " Options
+    let options = a:0 && type(a:1) is type({}) ? a:1 : {}
+    let virtual_replace = get(options, 'virtual_replace', 0)
+    let exclusive = get(options, 'exclusive', 0)
+    let virtualedit = get(options, 'virtualedit', &l:virtualedit)
 
     " Debug or not
     let debug = 0
@@ -23,26 +29,26 @@ function! vertr#R(virtual_replace, exclusive, ...)
     " 2. A replaced character
     let delstack = []
     " 'r' command to be used.
-    let r_cmd = (a:virtual_replace ? 'g' : '').'r'
+    let r_cmd = (virtual_replace ? 'g' : '').'r'
     " 'j' command to be used.
-    let j_cmd = (a:exclusive       ? 'g' : '').'j'
+    let j_cmd = (exclusive       ? 'g' : '').'j'
     " 'k' command to be used.
-    let k_cmd = (a:exclusive       ? 'g' : '').'k'
+    let k_cmd = (exclusive       ? 'g' : '').'k'
 
     if debug
-        PP! [a:virtual_replace, a:exclusive]
+        PP! [virtual_replace, exclusive]
     endif
 
-    if a:0 && type(a:1) is type("")
-    \   && a:1 =~# '^\%(block\|insert\|all\|onemore\)\%(,\%(block\|insert\|all\|onemore\)\)*$'
+    if &l:virtualedit !=# virtualedit
+    \   && virtualedit =~# '^\%(block\|insert\|all\|onemore\)\%(,\%(block\|insert\|all\|onemore\)\)*$'
         let prev_virtualedit = &l:virtualedit
-        let &l:virtualedit = a:1
+        let &l:virtualedit = virtualedit
     endif
 
     try
         while 1
             echohl ModeMsg
-            let modemsg = '--- vertical '.(a:virtual_replace ? 'V' : '').'REPLACE ---'
+            let modemsg = '--- vertical '.(virtual_replace ? 'V' : '').'REPLACE ---'
             if debug
                 let modemsg .= ' firstinput = '.firstinput.', delstack = '.string(delstack)
             endif

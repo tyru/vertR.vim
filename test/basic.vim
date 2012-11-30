@@ -10,9 +10,11 @@ function! s:vertr_R_case1()
     :1
     redraw
 
-    let virtual_replace = 0
-    let exclusive = 0
-    call vertr#R(virtual_replace, exclusive)
+    let options = {
+    \   'virtual_replace': 0,
+    \   'exclusive': 0,
+    \}
+    call vertr#R(options)
     quit!
 endfunction
 
@@ -22,9 +24,11 @@ function! s:vertr_R_case2()
     :1
     redraw
 
-    let virtual_replace = 0
-    let exclusive = 0
-    call vertr#R(virtual_replace, exclusive)
+    let options = {
+    \   'virtual_replace': 0,
+    \   'exclusive': 0,
+    \}
+    call vertr#R(options)
     quit!
 endfunction
 
@@ -34,9 +38,11 @@ function! s:vertr_R_case3()
     :1
     redraw
 
-    let virtual_replace = 1
-    let exclusive = 0
-    call vertr#R(virtual_replace, exclusive)
+    let options = {
+    \   'virtual_replace': 1,
+    \   'exclusive': 0,
+    \}
+    call vertr#R(options)
     quit!
 endfunction
 
@@ -46,9 +52,11 @@ function! s:vertr_R_case4()
     :1
     redraw
 
-    let virtual_replace = 1
-    let exclusive = 0
-    call vertr#R(virtual_replace, exclusive)
+    let options = {
+    \   'virtual_replace': 1,
+    \   'exclusive': 0,
+    \}
+    call vertr#R(options)
     quit!
 endfunction
 
